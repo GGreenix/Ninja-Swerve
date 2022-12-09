@@ -4,11 +4,11 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.PathConstraints;
-import com.pathplanner.lib.PathPlanner;
-import com.pathplanner.lib.PathPlannerTrajectory;
-import com.pathplanner.lib.PathPoint;
-import com.pathplanner.lib.commands.PPSwerveControllerCommand;
+// import com.pathplanner.lib.PathConstraints;
+// import com.pathplanner.lib.PathPlanner;
+// import com.pathplanner.lib.PathPlannerTrajectory;
+// import com.pathplanner.lib.PathPoint;
+// import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.CheckCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.subsystems.Swerve;
 
@@ -32,19 +33,24 @@ public class RobotContainer {
   
   Swerve _swerve;
   PS4Controller _controller;
-  JoystickButton _autonBtn;
+  JoystickButton _oneBtn = new JoystickButton(_controller, 0);
+  JoystickButton _twoBtn = new JoystickButton(_controller, 1);
+  JoystickButton _threeBtn = new JoystickButton(_controller, 2);
+  JoystickButton _fourBtn = new JoystickButton(_controller, 3);
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     _swerve = new Swerve();
     _controller = new PS4Controller(0);
     CommandScheduler.getInstance().registerSubsystem(_swerve);
-    _swerve.setDefaultCommand(new DefaultDriveCommand(
-      this._swerve,
-      () -> _controller.getLeftY(),
-      () -> _controller.getLeftX(),
-      () -> _controller.getRightX(),
-      () -> false
-      ));
+    _swerve.setDefaultCommand(null
+      // new DefaultDriveCommand(
+      // this._swerve,
+      // () -> 0,
+      // () -> 0,
+      // () -> 0,
+      // () -> false
+      // )
+      );
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -56,9 +62,22 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    _autonBtn.whenPressed(_swerve.getAutonomousCommand(
-      new PathPoint(new Translation2d(0,0),new Rotation2d(0))
-    ));
+    _oneBtn.whenPressed(
+      new CheckCommand(this._swerve,0)
+      // _swerve.getAutonomousCommand(new PathPoint(new Translation2d(0,0),new Rotation2d(0)))
+      );
+      _twoBtn.whenPressed(
+      new CheckCommand(this._swerve,1)
+      // _swerve.getAutonomousCommand(new PathPoint(new Translation2d(0,0),new Rotation2d(0)))
+      );
+      _threeBtn.whenPressed(
+      new CheckCommand(this._swerve,2)
+      // _swerve.getAutonomousCommand(new PathPoint(new Translation2d(0,0),new Rotation2d(0)))
+      );
+      _fourBtn.whenPressed(
+      new CheckCommand(this._swerve,3)
+      // _swerve.getAutonomousCommand(new PathPoint(new Translation2d(0,0),new Rotation2d(0)))
+      );
   }
 
   /**

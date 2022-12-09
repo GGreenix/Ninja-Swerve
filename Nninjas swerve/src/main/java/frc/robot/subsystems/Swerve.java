@@ -2,13 +2,15 @@ package frc.robot.subsystems;
 
 import java.util.HashMap;
 
-import com.ctre.phoenix.sensors.Pigeon2;
-import com.pathplanner.lib.PathConstraints;
-import com.pathplanner.lib.PathPlanner;
-import com.pathplanner.lib.PathPlannerTrajectory;
-import com.pathplanner.lib.PathPoint;
-import com.pathplanner.lib.commands.FollowPathWithEvents;
-import com.pathplanner.lib.commands.PPSwerveControllerCommand;
+import com.kauailabs.navx.frc.AHRS;
+
+// import com.ctre.phoenix.sensors.Pigeon2;
+// import com.pathplanner.lib.PathConstraints;
+// import com.pathplanner.lib.PathPlanner;
+// import com.pathplanner.lib.PathPlannerTrajectory;
+// import com.pathplanner.lib.PathPoint;
+// import com.pathplanner.lib.commands.FollowPathWithEvents;
+// import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -22,15 +24,15 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import edu.wpi.first.wpilibj.SPI;
 
 public class Swerve extends SubsystemBase {
   public SwerveDriveOdometry swerveOdometry;
   public SwerveModule[] mSwerveMods;
-  public Pigeon2 gyro;
+  AHRS gyro; 
 
   public Swerve() {
-    gyro = new Pigeon2(Constants.Swerve.pigeonID);
-    gyro.configFactoryDefault();
+    gyro = new AHRS(SPI.Port.kMXP);
     zeroGyro();
 
     swerveOdometry = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getYaw());
@@ -58,7 +60,9 @@ public class Swerve extends SubsystemBase {
       mod.setDesiredState(swerveModuleStates[mod.moduleNumber], isOpenLoop);
     }
   }
-
+  public void checkMods(int module){
+    mSwerveMods[module].checkMotors();
+  }
   /* Used by SwerveControllerCommand in Auto */
   public void setModuleStates(SwerveModuleState[] desiredStates) {
     SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.Swerve.maxSpeed);
@@ -91,39 +95,39 @@ public class Swerve extends SubsystemBase {
   }
 
   public void zeroGyro() {
-    gyro.setYaw(0);
+    gyro.zeroYaw();
   }
 
   public Rotation2d getYaw() {
     return (Constants.Swerve.invertGyro)
-        ? Rotation2d.fromDegrees(360 - gyro.getYaw())
-        : Rotation2d.fromDegrees(gyro.getYaw());
+        ? Rotation2d.fromDegrees(360 - gyro.getFusedHeading())
+        : Rotation2d.fromDegrees(gyro.getFusedHeading());
   }
-  public Command getAutonomousCommand(PathPoint newPoint) {
+  // public Command getAutonomousCommand(PathPoint newPoint) {
 
-    PathPlannerTrajectory traj = PathPlanner.generatePath(
-    new PathConstraints(4, 3), 
-    new PathPoint(new Translation2d(this.swerveOdometry.getPoseMeters().getX(),
-    this.swerveOdometry.getPoseMeters().getY()), Rotation2d.fromDegrees(0)), // position, heading
-    newPoint // position, heading
-    );
+  //   PathPlannerTrajectory traj = PathPlanner.generatePath(
+  //   new PathConstraints(4, 3), 
+  //   new PathPoint(new Translation2d(this.swerveOdometry.getPoseMeters().getX(),
+  //   this.swerveOdometry.getPoseMeters().getY()), Rotation2d.fromDegrees(0)), // position, heading
+  //   newPoint // position, heading
+  //   );
 
-    // HashMap<String, Command> eventMap = new HashMap<>();
-    // eventMap.put("marker1", new PrintCommand("Passed marker 1"));
+  //   // HashMap<String, Command> eventMap = new HashMap<>();
+  //   // eventMap.put("marker1", new PrintCommand("Passed marker 1"));
 
-    return new PPSwerveControllerCommand(traj,
-    this::getPose,
-    Constants.Swerve.swerveKinematics,
-    new PIDController(0, 0, 0),
-    new PIDController(0, 0, 0),
-    new PIDController(0, 0, 0),
-    this::setModuleStates,
-    this
+  //   return new PPSwerveControllerCommand(traj,
+  //   this::getPose,
+  //   Constants.Swerve.swerveKinematics,
+  //   new PIDController(0, 0, 0),
+  //   new PIDController(0, 0, 0),
+  //   new PIDController(0, 0, 0),
+  //   this::setModuleStates,
+  //   this
     
-  );
+  // );
 
-    // An ExampleCommand will run in autonomous
-  }
+  //   // An ExampleCommand will run in autonomous
+  // }
   @Override
   public void periodic() {
     swerveOdometry.update(getYaw(), getStates());

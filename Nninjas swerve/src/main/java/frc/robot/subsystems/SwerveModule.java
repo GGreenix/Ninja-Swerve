@@ -63,7 +63,10 @@ public class SwerveModule {
 
     lastAngle = getState().angle.getDegrees();
   }
-
+  public void checkMotors(){
+    driveMotor.set(0.2);
+    angleMotor.set(0.2);
+  }
   public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop) {
     desiredState =
         OnboardModuleState.optimize(
